@@ -3,51 +3,35 @@ import os
 
 tictactoe = {
     "A1": " ",
-     "A2": " ",
-     "A3": " ",
-     "B1": " ",
-     "B2": " ",
-     "B3": " ",
-     "C1": " ",
-     "C2": " ",
-     "C3": " "
-     }
+    "A2": " ",
+    "A3": " ",
+    "B1": " ",
+    "B2": " ",
+    "B3": " ",
+    "C1": " ",
+    "C2": " ",
+    "C3": " "
+    }
 
 
 def main():
     print_grid()
-    for i in range(5):
+    while not check_win(tictactoe) or not is_tie(tictactoe):
         player = "X"
         position = input("Enter the position (eg. A1, B3, C2): ").upper()
         if not position in ["A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"]:
             print("Invalid position")
             continue
-        if validate_input(player, position):
+        if not tictactoe[position] == " ":
             print("Can't place there!")
             continue    
         tictactoe[position] = player
         print_grid()
-        if check_win(tictactoe):
-            print(f"You win!")
-            return
-        if is_tie(tictactoe):
-            print("It's a tie!")
-            return
+        gameState(tictactoe, player) #Checks if there's a winner or tie
         tictactoe[get_ai_move(tictactoe)] = "O"
-        if check_win(tictactoe):
-            print("AI wins!")
-            print_grid()
-            return
-        if is_tie(tictactoe):
-            print("It's a tie!")
-            print_grid()
-            return
         print_grid()
+        gameState(tictactoe, "O")
 
-def print_grid():
-    clean_board()
-    print(f"Your player: X\nAI player: O\n\n  | 1 | 2 | 3\nA | {tictactoe['A1']} | {tictactoe['A2']} | {tictactoe['A3']}\nB | {tictactoe['B1']} | {tictactoe['B2']} | {tictactoe['B3']}\nC | {tictactoe['C1']} | {tictactoe['C2']} | {tictactoe['C3']}\n")
-    
 def validate_input(player, position):
     def other_sign(player):
         if player == "X":
@@ -57,8 +41,23 @@ def validate_input(player, position):
         return True
     return False
 
+def print_grid():
+    clean_board()
+    print(f"Your player: X\nAI player: O\n\n  | 1 | 2 | 3\nA | {tictactoe['A1']} | {tictactoe['A2']} | {tictactoe['A3']}\nB | {tictactoe['B1']} | {tictactoe['B2']} | {tictactoe['B3']}\nC | {tictactoe['C1']} | {tictactoe['C2']} | {tictactoe['C3']}\n")
+
+def gameState(board, player):
+    if check_win(board):
+        if player == "O":
+            print("AI wins!")
+            exit()
+        print(f"You win!")
+        exit()  
+    if is_tie(board):
+        print("Its a tie!")
+        exit()
+
+
 def available_moves(board):
-    #print([k for k, v in board.items() if v == " "])
     return [k for k, v in board.items() if v == " "]
             
 def minimax(board, depth, maximizing_player):
@@ -100,7 +99,7 @@ def get_ai_move(board):
             best_move = move
     return best_move
 def check_win(board):
-   
+
     # Check rows
     for row in ['A', 'B', 'C']:
         if board[row + '1'] + board[row + '2'] + board[row + '3'] == "XXX" or board[row + '1'] + board[row + '2'] + board[row + '3'] == "OOO":
@@ -128,3 +127,4 @@ def clean_board():
 
 if __name__ == "__main__":
     main()
+
