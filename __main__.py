@@ -1,130 +1,81 @@
 # I'M IMPROVISING, IF YOU SEE THIS I WAS THROUGH HELL
 import os
 
-tictactoe = {
-    "A1": " ",
-    "A2": " ",
-    "A3": " ",
-    "B1": " ",
-    "B2": " ",
-    "B3": " ",
-    "C1": " ",
-    "C2": " ",
-    "C3": " "
-    }
-
-
-def main():
-    print_grid()
-    while not check_win(tictactoe) or not is_tie(tictactoe):
-        player = "X"
-        position = input("Enter the position (eg. A1, B3, C2): ").upper()
-        if not position in ["A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"]:
-            print("Invalid position")
-            continue
-        if not tictactoe[position] == " ":
-            print("Can't place there!")
-            continue    
-        tictactoe[position] = player
-        print_grid()
-        gameState(tictactoe, player) #Checks if there's a winner or tie
-        tictactoe[get_ai_move(tictactoe)] = "O"
-        print_grid()
-        gameState(tictactoe, "O")
-
-def validate_input(player, position):
-    def other_sign(player):
-        if player == "X":
+class Mark():
+    def __init__(self, label):
+        self.label = label.upper()
+    def opposite(self):
+        if self.label == "X":
             return "O"
-        return "X"
-    if other_sign(player) == tictactoe[position]:
-        return True
-    return False
+        elif self.label == "O":
+            return "X"
+        else:
+            return None
+
+board = {
+    "A1": Mark(" "), "A2": Mark(" "), "A3": Mark(" "),
+    "B1": Mark(" "), "B2": Mark(" "), "B3": Mark(" "),
+    "C1": Mark(" "), "C2": Mark("O"), "C3": Mark(" "),
+}
 
 def print_grid():
-    clean_board()
-    print(f"Your player: X\nAI player: O\n\n  | 1 | 2 | 3\nA | {tictactoe['A1']} | {tictactoe['A2']} | {tictactoe['A3']}\nB | {tictactoe['B1']} | {tictactoe['B2']} | {tictactoe['B3']}\nC | {tictactoe['C1']} | {tictactoe['C2']} | {tictactoe['C3']}\n")
+    print(f"Your player: X\nAI player: O\n\n  | 1 | 2 | 3\n\
+A | {board['A1'].label} | {board['A2'].label} | {board['A3'].label}\n\
+B | {board['B1'].label} | {board['B2'].label} | {board['B3'].label}\n\
+C | {board['C1'].label} | {board['C2'].label} | {board['C3'].label}\n")
 
-def gameState(board, player):
-    if check_win(board):
-        if player == "O":
-            print("AI wins!")
-            exit()
-        print(f"You win!")
-        exit()  
-    if is_tie(board):
-        print("Its a tie!")
-        exit()
-
-
-def available_moves(board):
-    return [k for k, v in board.items() if v == " "]
-            
-def minimax(board, depth, maximizing_player):
-    if check_win(board):
-        return -1 if maximizing_player else 1  # Negative score for maximizing player (loss)
-    if is_tie(board):
-        return 0
-    elif maximizing_player:
-        max_eval = float('-inf')
-        for move in available_moves(board):
-            board[move] = 'O'
-            eval = minimax(board, depth + 1, False)
-            board[move] = ' '  # Undo the move
-            max_eval = max(max_eval, eval)
-        return max_eval
-    else:
-        min_eval = float('inf')
-        for move in available_moves(board):
-            board[move] = 'X'
-            eval = minimax(board, depth + 1, True)
-            board[move] = ' '  # Undo the move
-            min_eval = min(min_eval, eval)
-        return min_eval
-
-def is_tie(board):
-    if not check_win(board) and available_moves(board) == []:
-        return True
-    return False
-
-def get_ai_move(board):
-    best_score = float('-inf')
-    best_move = None
-    for move in available_moves(board):
-        board[move] = 'O'
-        score = minimax(board, 0, False)
-        board[move] = ' '  # Undo the move
-        if score > best_score:
-            best_score = score
-            best_move = move
-    return best_move
-def check_win(board):
-
-    # Check rows
-    for row in ['A', 'B', 'C']:
-        if board[row + '1'] + board[row + '2'] + board[row + '3'] == "XXX" or board[row + '1'] + board[row + '2'] + board[row + '3'] == "OOO":
-            return True
-
-    # Check columns
-    for col in ['1', '2', '3']:
-        combo = board['A' + col] + board['B' + col] + board['C' + col]
-        if combo == "XXX" or combo == "OOO":
-            return True
-
-    # Check diagonals
-    if board['A1'] + board['B2'] + board['C3'] == "XXX" or board['A1'] + board['B2'] + board['C3'] == "OOO":
-        return True
-    if board['A3'] + board['B2'] + board['C1'] == "XXX" or board['A3'] + board['B2'] + board['C1'] == "OOO":
-        return True
-
-    return False
-
-def clean_board():
+def clean_grid():
     if os.name == 'nt':
         os.system('cls')
     else:
         os.system('clear')
 
+def place_mark(mark, position, board):
+    validate_input(position, board, mark)
+    board[position] = Mark(mark)
+
+def validate_input(position, board, mark):
+    if not position in ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3']:
+        return False
+    if board[position].label == Mark(mark).opposite():
+        return False
+    return True
+
+#! Done
+def check_win(board):
+    #Rows and columns
+    for row in ['A', 'B', 'C']:
+        combo = board[row + '1'].label + board[row + '2'].label + board[row + '3'].label
+        if combo == "XXX" \
+        or combo == "OOO":
+            return board[row + '1'].label
+    for col in ['1', '2', '3']:
+        combo = board['A' + col].label + board['B' + col].label + board['C' + col].label
+        if combo == "XXX" or combo == "OOO":
+            return board['A' + col].label
+    #Diagonals
+    combo = board['A1'].label + board['B2'].label + board['C3'].label
+    if combo == "OOO" or combo == "XXX":
+        return board["B2"].label
+    combo = board['A3'].label + board['B2'].label + board['C1'].label
+    if combo == "OOO" or combo == "XXX":
+        return board["B2"].label
+#! Done
+def check_tie(board):
+    for spot in board:
+        if board[spot].label == " ": return False
+        continue
+    return True
+
+
+def main():
+    position = input("Where do you wanna place ur thingy?: ").upper()
+    place_mark("X", position, board)
+    print_grid()
+    print(Mark("X").opposite())
+
+def offroad():
+    
+
 if __name__ == "__main__":
     main()
-
